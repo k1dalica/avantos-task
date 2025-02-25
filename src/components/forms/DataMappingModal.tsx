@@ -3,21 +3,28 @@ import Modal from "../common/Modal";
 import TreeItem from "../common/TreeItem";
 import { Node } from "reactflow";
 import { useGraphStore } from "@/stores/graphStore";
-import { FormNode } from "@/types/graph";
 
 interface Props {
   isOpen: boolean;
   node: Node;
   onClose: () => void;
-  onSelect: (value: string) => void;
+  onSelect: (id: string, parentId: string) => void;
 }
 
-const defaultTreeData = [
+interface TreeItem {
+  id: string;
+  label: string;
+  items: string[];
+}
+
+const defaultTreeData: TreeItem[] = [
   {
+    id: "action_properties",
     label: "Action Properties",
     items: ["action_id", "action_name", "action_type"],
   },
   {
+    id: "client_organisation_properties",
     label: "Client Organisation Properties",
     items: ["org_name", "org_id", "org_type"],
   },
@@ -25,7 +32,8 @@ const defaultTreeData = [
 
 const DataMappingModal: FC<Props> = ({ node, isOpen, onClose, onSelect }) => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedItem, setSelectedItem] = useState("");
+  const [selectedParent, setSelectedParent] = useState<string | null>(null);
+  const [selectedItem, setSelectedItem] = useState<string | null>(null);
 
   const { nodes, forms } = useGraphStore();
 
@@ -51,13 +59,16 @@ const DataMappingModal: FC<Props> = ({ node, isOpen, onClose, onSelect }) => {
   }, [nodes, node.data.prerequisites]);
 
   const prerequisiteData = useMemo(() => {
-    return getAllPrerequisiteNodes?.map((n: Node) => {
-      const form = forms?.find((f) => f.id === n.data.component_id) as any;
-      return {
-        label: n.data.name,
-        items: Object.keys(form?.dynamic_field_config ?? {}),
-      };
-    });
+    return getAllPrerequisiteNodes
+      ?.map((n: Node) => {
+        const form = forms?.find((f) => f.id === n.data.component_id) as any;
+        return {
+          id: n.data.name,
+          label: n.data.name,
+          items: Object.keys(form?.dynamic_field_config ?? {}),
+        };
+      })
+      .reverse();
   }, [forms, getAllPrerequisiteNodes]);
 
   const filteredTreeData = useMemo(() => {
@@ -74,8 +85,15 @@ const DataMappingModal: FC<Props> = ({ node, isOpen, onClose, onSelect }) => {
       .filter((section) => section.items.length > 0);
   }, [searchQuery, prerequisiteData]);
 
-  const handleSelect = (value: string) => {
+  const handleSelect = (value: string, parentId: string) => {
+    setSelectedParent(parentId);
     setSelectedItem(value);
+  };
+
+  const _onSelect = () => {
+    if (selectedItem && selectedParent) {
+      onSelect(selectedItem, selectedParent);
+    }
   };
 
   const handleClose = () => {
@@ -101,13 +119,13 @@ const DataMappingModal: FC<Props> = ({ node, isOpen, onClose, onSelect }) => {
       </div>
 
       <div className="my-5 text-gray-700">
-        {filteredTreeData.map((section) => (
+        {filteredTreeData.map((section: TreeItem) => (
           <TreeItem
             key={section.label}
             label={section.label}
             items={section.items}
-            selectedItem={selectedItem}
-            onSelect={handleSelect}
+            selectedItem={section.id === selectedParent ? selectedItem : null}
+            onSelect={(item) => handleSelect(item, section.id)}
           />
         ))}
       </div>
@@ -120,7 +138,8 @@ const DataMappingModal: FC<Props> = ({ node, isOpen, onClose, onSelect }) => {
           CANCEL
         </button>
         <button
-          onClick={() => selectedItem && onSelect(selectedItem)}
+          onClick={() => selectedItem && _onSelect()}
+          disabled={!selectedItem}
           className={`px-4 py-2 rounded-md ${
             selectedItem
               ? "bg-blue-400 hover:bg-blue-500"

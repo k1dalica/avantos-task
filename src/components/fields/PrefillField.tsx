@@ -35,21 +35,21 @@ interface PrefillFieldProps {
   name: string;
   sourceForm: string;
   sourceField: string;
-  onChange: () => void;
+  onClear: () => void;
 }
 
 const PrefillField = ({
   name,
   sourceForm,
   sourceField,
-  onChange,
+  onClear,
 }: PrefillFieldProps) => {
   return (
     <PrefillContainer>
       <FieldText>
         {name}: {sourceForm}.{sourceField}
       </FieldText>
-      <CloseButton onClick={onChange}>✕</CloseButton>
+      <CloseButton onClick={onClear}>✕</CloseButton>
     </PrefillContainer>
   );
 };

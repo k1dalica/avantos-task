@@ -5,7 +5,7 @@ interface TreeItemProps {
   label: string;
   items?: string[];
   defaultExpanded?: boolean;
-  selectedItem?: string;
+  selectedItem?: string | null;
   onSelect?: (value: string) => void;
 }
 

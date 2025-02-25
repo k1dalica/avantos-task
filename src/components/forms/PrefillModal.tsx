@@ -2,7 +2,7 @@ import { Node } from "reactflow";
 import Modal from "../common/Modal";
 import { FormNode } from "@/types/graph";
 import styled from "styled-components";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import DynamicField from "../fields/DynamicField";
 import { Switch } from "../common/Switch";
 import PrefillField from "../fields/PrefillField";
@@ -28,8 +28,52 @@ interface Props {
   onClose: () => void;
 }
 
+interface FieldData {
+  label: string;
+  sourceForm?: string;
+  sourceField?: string;
+}
+
 const PrefillModal = ({ node, form, onClose }: Props) => {
   const [prefillEnabled, setPrefillEnabled] = useState(true);
+  const [fields, setFields] = useState<FieldData[]>([
+    {
+      label: "dynamic_checkbox_group",
+    },
+    {
+      label: "dynamic_object",
+    },
+    {
+      label: "email",
+      sourceForm: "Form A",
+      sourceField: "email",
+    },
+  ]);
+
+  const clearField = useCallback((index: number) => {
+    setFields((fields) =>
+      fields.map((field: FieldData, i) =>
+        i === index
+          ? ({
+              ...field,
+              sourceForm: undefined,
+              sourceField: undefined,
+            } as FieldData)
+          : field
+      )
+    );
+  }, []);
+
+  const onChange = useCallback(
+    (index: number, sourceField: string, sourceForm: string) => {
+      setFields(
+        fields.map((field, i) =>
+          i === index ? { ...field, sourceField, sourceForm } : field
+        )
+      );
+    },
+    [fields]
+  );
 
   if (!node) return null;
 
@@ -40,24 +84,28 @@ const PrefillModal = ({ node, form, onClose }: Props) => {
           <Subtitle>Prefill fields for this form</Subtitle>
           <Switch
             checked={prefillEnabled}
-            onChange={(newValue) => {
-              setPrefillEnabled(newValue);
-            }}
+            onChange={(newValue) => setPrefillEnabled(newValue)}
           />
         </Header>
 
-        <DynamicField
-          node={node}
-          name="dynamic_checkbox_group"
-          onChange={() => {}}
-        />
-        <DynamicField node={node} name="dynamic_object" onChange={() => {}} />
-        <PrefillField
-          name="email"
-          sourceForm="Form A"
-          sourceField="email"
-          onChange={() => {}}
-        />
+        {fields.map((field, index) =>
+          field.sourceForm ? (
+            <PrefillField
+              key={index}
+              name={field.label}
+              sourceForm={field.sourceForm}
+              sourceField={field.sourceField || ""}
+              onClear={() => clearField(index)}
+            />
+          ) : (
+            <DynamicField
+              key={index}
+              node={node}
+              name={field.label}
+              onChange={(id, parentId) => onChange(index, id, parentId)}
+            />
+          )
+        )}
       </FormFieldsContainer>
     </Modal>
   );

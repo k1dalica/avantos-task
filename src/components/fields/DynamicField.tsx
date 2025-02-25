@@ -5,7 +5,7 @@ import { Node } from "reactflow";
 interface Props {
   name: string;
   node: Node;
-  onChange: (value: any) => void;
+  onChange: (id: string, parentId: string) => void;
 }
 
 const DynamicField = ({ name, node, onChange }: Props) => {
@@ -27,8 +27,8 @@ const DynamicField = ({ name, node, onChange }: Props) => {
         node={node}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        onSelect={(value) => {
-          onChange(value);
+        onSelect={(id, parentId) => {
+          onChange(id, parentId);
           setIsModalOpen(false);
         }}
       />
