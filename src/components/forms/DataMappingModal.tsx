@@ -1,14 +1,18 @@
-import { useMemo, useState } from "react";
+import { FC, useMemo, useState } from "react";
 import Modal from "../common/Modal";
 import TreeItem from "../common/TreeItem";
+import { Node } from "reactflow";
+import { useGraphStore } from "@/stores/graphStore";
+import { FormNode } from "@/types/graph";
 
 interface Props {
   isOpen: boolean;
+  node: Node;
   onClose: () => void;
   onSelect: (value: string) => void;
 }
 
-const treeData = [
+const defaultTreeData = [
   {
     label: "Action Properties",
     items: ["action_id", "action_name", "action_type"],
@@ -17,42 +21,58 @@ const treeData = [
     label: "Client Organisation Properties",
     items: ["org_name", "org_id", "org_type"],
   },
-  {
-    label: "Form A",
-    items: ["title", "description", "status"],
-  },
-  {
-    label: "Form B",
-    items: [
-      "completed_at",
-      "button",
-      "dynamic_checkbox_group",
-      "dynamic_object",
-      "email",
-      "id",
-      "multi_select",
-      "name",
-      "notes",
-    ],
-  },
 ];
 
-const DataMappingModal = ({ isOpen, onClose, onSelect }: Props) => {
+const DataMappingModal: FC<Props> = ({ node, isOpen, onClose, onSelect }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedItem, setSelectedItem] = useState("");
 
-  const filteredTreeData = useMemo(() => {
-    if (!searchQuery) return treeData;
+  const { nodes, forms } = useGraphStore();
 
-    return treeData
+  const getAllPrerequisiteNodes = useMemo(() => {
+    const visited = new Set<string>();
+
+    const traverse = (nodeId: string) => {
+      if (visited.has(nodeId)) return [];
+      visited.add(nodeId);
+
+      const currentNode = nodes?.find((n) => n.id === nodeId) as Node;
+      if (!currentNode) return [];
+
+      const prerequisites = currentNode.data.prerequisites || [];
+      const prerequisiteNodes = prerequisites.flatMap((preId: string) =>
+        traverse(preId)
+      );
+
+      return [currentNode, ...prerequisiteNodes];
+    };
+
+    return node.data.prerequisites?.flatMap(traverse) || [];
+  }, [nodes, node.data.prerequisites]);
+
+  const prerequisiteData = useMemo(() => {
+    return getAllPrerequisiteNodes?.map((n: Node) => {
+      const form = forms?.find((f) => f.id === n.data.component_id) as any;
+      return {
+        label: n.data.name,
+        items: Object.keys(form?.dynamic_field_config ?? {}),
+      };
+    });
+  }, [forms, getAllPrerequisiteNodes]);
+
+  const filteredTreeData = useMemo(() => {
+    const allData = [...defaultTreeData, ...prerequisiteData];
+    if (!searchQuery) return allData;
+
+    return allData
       .map((section) => ({
         ...section,
-        items: section.items.filter((item) =>
+        items: section.items.filter((item: string) =>
           item.toLowerCase().includes(searchQuery.toLowerCase())
         ),
       }))
       .filter((section) => section.items.length > 0);
-  }, [searchQuery]);
+  }, [searchQuery, prerequisiteData]);
 
   const handleSelect = (value: string) => {
     setSelectedItem(value);

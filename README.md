@@ -1,12 +1,15 @@
-# Project Name
+# Journey Builder
 
-Brief description of your project - what it does and what makes it special.
+A tool for building journey blueprints.
 
 ## Features
 
-- Feature 1
-- Feature 2
-- Feature 3
+- React Flow
+- Zustand
+- Styled Components
+- Next.js
+- TypeScript
+- Jest
 
 ## Prerequisites
 
@@ -41,14 +44,54 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-## Environment Variables
+## Running Locally
 
-Create a `.env.local` file in the root directory and add the following variables:
+1. Clone the repository:
+
+```bash
+git clone <repository-url>
+cd <project-directory>
+```
+
+2. Install dependencies:
+
+```bash
+npm install
+```
+
+3. Set up your environment variables:
+
+```bash
+cp .env.example .env.local
+```
+
+4. Update `.env.local` with your configuration:
 
 ```bash
 NEXT_PUBLIC_API_URL=your_api_url_here
 # Add other environment variables
 ```
+
+### Component Patterns
+
+- **Modal Components**: Use the base Modal component for consistency (`src/components/common/Modal.tsx`)
+- **Form Handling**: Implement form components using the established patterns in `src/components/forms`
+- **Data Mapping**: Follow the data mapping pattern in `DataMappingModal.tsx`
+- **Tree Item**: Use the Tree Item component for consistency (`src/components/common/TreeItem.tsx`)
+- **Switch**: Use the Switch component for consistency (`src/components/common/Switch.tsx`)
+
+### Testing Patterns
+
+- Unit tests for components using Jest and React Testing Library
+- Integration tests for data flows
+- Mock external dependencies in tests
+
+### Best Practices
+
+- Use TypeScript interfaces for data models
+- Follow the established modal patterns for user interactions
+- Implement error boundaries for component error handling
+- Use the provided utility functions in `src/lib`
 
 ## Project Structure
 
@@ -57,10 +100,11 @@ NEXT_PUBLIC_API_URL=your_api_url_here
 ├── components/         # Reusable components
 ├── lib/               # Utility functions and libraries
 ├── public/            # Static assets
-└── styles/            # Global styles
+└── stores/            # Global stores
+├── types/             # TypeScript types
+├── utils/             # Utility functions
+└── config/            # Configuration
 ```
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
 ## Learn More
 

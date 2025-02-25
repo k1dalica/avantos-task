@@ -32,12 +32,9 @@ const ItemsContainer = styled.div`
   margin-left: 24px;
 `;
 
-const Item = styled.div<{ isSelected: boolean }>`
+const Item = styled.div`
   padding: 8px;
   cursor: pointer;
-  color: ${(props) => (props.isSelected ? "#3B82F6" : "#4B5563")};
-  background-color: ${(props) =>
-    props.isSelected ? "#f9fafb" : "transparent"};
   &:hover {
     background-color: #f9fafb;
   }
@@ -63,7 +60,11 @@ const TreeItem = ({
           {items.map((item) => (
             <Item
               key={item}
-              isSelected={selectedItem === item}
+              style={{
+                color: selectedItem === item ? "#3B82F6" : "#4B5563",
+                backgroundColor:
+                  selectedItem === item ? "#f9fafb" : "transparent",
+              }}
               onClick={() => onSelect?.(item)}
             >
               {item}

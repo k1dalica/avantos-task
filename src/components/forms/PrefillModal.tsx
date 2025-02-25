@@ -23,7 +23,7 @@ const Subtitle = styled.p`
 `;
 
 interface Props {
-  node: Node | null;
+  node: Node;
   form: FormNode | null;
   onClose: () => void;
 }
@@ -46,8 +46,12 @@ const PrefillModal = ({ node, form, onClose }: Props) => {
           />
         </Header>
 
-        <DynamicField name="dynamic_checkbox_group" onChange={() => {}} />
-        <DynamicField name="dynamic_object" onChange={() => {}} />
+        <DynamicField
+          node={node}
+          name="dynamic_checkbox_group"
+          onChange={() => {}}
+        />
+        <DynamicField node={node} name="dynamic_object" onChange={() => {}} />
         <PrefillField
           name="email"
           sourceForm="Form A"

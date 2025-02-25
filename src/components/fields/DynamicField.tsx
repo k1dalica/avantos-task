@@ -1,12 +1,14 @@
 import { useState } from "react";
 import DataMappingModal from "../forms/DataMappingModal";
+import { Node } from "reactflow";
 
 interface Props {
   name: string;
+  node: Node;
   onChange: (value: any) => void;
 }
 
-const DynamicField = ({ name, onChange }: Props) => {
+const DynamicField = ({ name, node, onChange }: Props) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
@@ -22,6 +24,7 @@ const DynamicField = ({ name, onChange }: Props) => {
       </button>
 
       <DataMappingModal
+        node={node}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSelect={(value) => {
